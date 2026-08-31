@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0b1020" />
+    <meta name="description" content="Panel privado de organización académica para el semestre UNSCH 2026-II." />
+    <title>Rumbo · Semestre 2026-II</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <section class="lock-screen" id="lock-screen" aria-labelledby="lock-title">
+      <div class="lock-card">
+        <div class="lock-symbol" aria-hidden="true">
+          <svg viewBox="0 0 48 48" role="img"><path d="M14 22v-5a10 10 0 0 1 20 0v5M11 22h26v18H11z"/><path d="M24 29v5"/></svg>
+        </div>
+        <p class="eyebrow">Espacio personal · 2026-II</p>
+        <h1 id="lock-title">Tu semestre, bajo llave.</h1>
+        <p id="auth-copy">Ingresa tu PIN para abrir tu espacio académico. En este navegador podrás entrar automáticamente después.</p>
+        <form id="auth-form" class="auth-form">
+          <label class="sr-only" for="access-password">PIN de 4 dígitos</label>
+          <input id="access-password" name="password" class="pin-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="4" readonly aria-label="PIN de 4 dígitos" />
+          <div class="pin-display" id="pin-display" aria-live="polite" aria-label="PIN ingresado"><span></span><span></span><span></span><span></span></div>
+          <div class="pin-pad" aria-label="Teclado numérico">
+            <button type="button" class="pin-key" data-pin="1">1</button><button type="button" class="pin-key" data-pin="2">2</button><button type="button" class="pin-key" data-pin="3">3</button>
+            <button type="button" class="pin-key" data-pin="4">4</button><button type="button" class="pin-key" data-pin="5">5</button><button type="button" class="pin-key" data-pin="6">6</button>
+            <button type="button" class="pin-key" data-pin="7">7</button><button type="button" class="pin-key" data-pin="8">8</button><button type="button" class="pin-key" data-pin="9">9</button>
+            <span class="pin-key-spacer" aria-hidden="true"></span><button type="button" class="pin-key" data-pin="0">0</button><button type="button" class="pin-key pin-delete" id="pin-delete" aria-label="Borrar último dígito">⌫</button>
+          </div>
+          <label class="check-line" id="remember-line">
+            <input id="remember-device" type="checkbox" checked />
+            <span>Recordar este dispositivo</span>
+          </label>
+          <button class="button button-primary button-wide pressable" type="submit"><span id="auth-button-label">Desbloquear</span><span aria-hidden="true">↗</span></button>
+          <p class="form-error" id="auth-error" role="alert"></p>
+        </form>
+        <p class="lock-footnote" id="auth-footnote">PIN de acceso · 4 dígitos · navegador reconocido</p>
+      </div>
+    </section>
+
+    <div class="app-shell is-locked" id="app-shell">
+      <aside class="app-rail" aria-label="Navegación principal">
+        <div class="brand-lockup">
+          <div class="brand-mark" aria-hidden="true"><span>R</span></div>
+          <div><strong>rumbo</strong><span>semestre 2026-II</span></div>
+        </div>
+        <div class="rail-divider"></div>
+        <p class="rail-label">Tu espacio</p>
+        <nav class="main-nav" id="main-nav">
+          <button class="nav-item is-active" data-view="inicio" type="button"><span class="nav-icon">⌂</span>Resumen</button>
+          <button class="nav-item" data-view="horario" type="button"><span class="nav-icon">▦</span>Horario</button>
+          <button class="nav-item" data-view="notas" type="button"><span class="nav-icon">◔</span>Notas</button>
+          <button class="nav-item" data-view="plan" type="button"><span class="nav-icon">✓</span>Plan</button>
+          <button class="nav-item" data-view="fechas" type="button"><span class="nav-icon">◷</span>Fechas</button>
+        </nav>
+        <div class="rail-bottom">
+          <div class="privacy-badge"><span class="status-dot"></span><div><strong>Privado en este equipo</strong><small>Datos locales · sin nube</small></div></div>
+          <button class="rail-action" id="lock-now" type="button"><span>⌁</span> Bloquear ahora</button>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div class="breadcrumb"><span>Ingeniería de Sistemas</span><span class="slash">/</span><strong>2026-II</strong></div>
+          <div class="topbar-actions">
+            <button class="icon-button" id="quick-add" type="button" aria-label="Agregar tarea" title="Agregar tarea">＋</button>
+            <button class="avatar-button" id="profile-chip" type="button" aria-label="Abrir opciones de privacidad"><span>JH</span></button>
+          </div>
+        </header>
+
+        <div class="content-wrap">
+          <section class="view is-visible" id="view-inicio" data-view-panel="inicio">
+            <div class="page-heading fade-up">
+              <div>
+                <p class="eyebrow">Lunes · 31 de agosto de 2026</p>
+                <h1>Que tu semestre <em>tenga dirección.</em></h1>
+                <p class="heading-copy">Cinco cursos, una ruta clara y espacio para que lo pendiente deje de perseguirte.</p>
+              </div>
+              <button class="button button-secondary pressable" data-open-dialog="task-dialog" type="button"><span>＋</span> Nueva tarea</button>
+            </div>
+
+            <div class="hero-mosaic">
+              <article class="next-card panel panel-glow fade-up" style="--delay: 70ms">
+                <div class="card-topline"><span class="live-pill"><i></i> Hoy en tu agenda</span><span class="muted-label">09:00 — 10:00</span></div>
+                <div class="next-card-main"><div><p class="course-kicker">IS-380 · Sistemas operativos</p><h2>Teoría</h2><p class="location-line"><span>Campus presencial</span><span class="dot-separator"></span><span>Bloque confirmado</span></p></div><div class="time-orbit"><span>09</span><small>AM</small></div></div>
+                <div class="next-card-footer"><span>Después: laboratorio de Modelado · martes 09:00</span><button class="text-button" data-view-target="horario" type="button">Ver horario <span>→</span></button></div>
+              </article>
+              <article class="focus-card panel fade-up" style="--delay: 140ms">
+                <div class="card-topline"><span class="eyebrow">Pulso del semestre</span><span class="signal-mark">◒</span></div>
+                <div class="focus-score"><strong>68</strong><span>%<br /><small>en marcha</small></span></div>
+                <div class="score-bar"><span style="width:68%"></span></div>
+                <p>Las clases empiezan hoy. Aún hay <strong>5 bloques</strong> por confirmar.</p>
+                <button class="text-button" data-view-target="fechas" type="button">Revisar hitos <span>→</span></button>
+              </article>
+            </div>
+
+            <div class="metric-grid fade-up" style="--delay: 210ms">
+              <article class="metric-card"><span class="metric-label">Cursos activos</span><strong>05</strong><span class="metric-note">9 h confirmadas · 8 h provisionales</span></article>
+              <article class="metric-card"><span class="metric-label">Próxima ventana</span><strong>07 sep</strong><span class="metric-note">Exoneración de cursos</span></article>
+              <article class="metric-card"><span class="metric-label">Tareas abiertas</span><strong id="metric-tasks">03</strong><span class="metric-note">Organizadas por prioridad</span></article>
+              <article class="metric-card accent-metric"><span class="metric-label">Cierre de clases</span><strong>23 dic</strong><span class="metric-note">Publicación de notas el mismo día</span></article>
+            </div>
+
+            <div class="section-header"><div><p class="eyebrow">Vista rápida</p><h2>Lo que merece tu atención</h2></div><button class="text-button" data-view-target="plan" type="button">Abrir plan completo <span>→</span></button></div>
+            <div class="attention-grid">
+              <article class="attention-card pending-card"><div class="attention-icon amber">!</div><div><span class="card-tag">Pendiente de confirmar</span><h3>Laboratorios y prácticas</h3><p>IS-380, IS-384 e IS-386 aún necesitan aula u horario definitivo.</p></div><button class="mini-arrow" data-view-target="horario" type="button" aria-label="Ver pendientes">↗</button></article>
+              <article class="attention-card"><div class="attention-icon cyan">↗</div><div><span class="card-tag">Siguiente foco</span><h3>Subir criterios de evaluación</h3><p>El periodo oficial para sílabos y porcentajes termina el 04 de septiembre.</p></div><button class="mini-arrow" data-view-target="notas" type="button" aria-label="Ver calculadora de notas">↗</button></article>
+              <article class="quote-card"><span class="quote-mark">“</span><p>Una semana visible es una semana que puedes decidir.</p><span class="quote-caption">— tu tablero de ruta</span></article>
+            </div>
+          </section>
+
+          <section class="view" id="view-horario" data-view-panel="horario" hidden>
+            <div class="page-heading compact-heading">
+              <div><p class="eyebrow">Semana del 31 de agosto</p><h1>Horario <em>en contexto.</em></h1><p class="heading-copy">Los bloques con línea discontinua siguen sujetos a confirmación docente.</p></div>
+              <div class="week-controls"><button class="icon-button" id="prev-week" type="button" aria-label="Semana anterior">←</button><button class="week-current" id="week-current" type="button">Esta semana</button><button class="icon-button" id="next-week" type="button" aria-label="Semana siguiente">→</button></div>
+            </div>
+            <div class="legend-row"><span><i class="legend-dot confirmed"></i> Confirmado por tu registro</span><span><i class="legend-dot pending"></i> Falta confirmar</span><span class="schedule-total" id="schedule-total">9 h confirmadas · 8 h provisionales · 1 sin horario</span></div>
+            <div class="schedule-shell panel"><div class="schedule-scroll"><div class="calendar-grid" id="calendar-grid"></div></div></div>
+            <div class="schedule-notes"><article class="note-strip"><span class="note-icon">i</span><div><strong>Por confirmar</strong><p>IS-286: laboratorio del viernes · IS-380: práctica sin día ni hora · IS-384: laboratorio · IS-386: práctica · PS-182: práctica no estática.</p></div></article><button class="button button-secondary pressable" data-open-dialog="task-dialog" type="button">＋ Añadir recordatorio</button></div>
+          </section>
+
+          <section class="view" id="view-notas" data-view-panel="notas" hidden>
+            <div class="page-heading compact-heading"><div><p class="eyebrow">Control de rendimiento</p><h1>Notas <em>sin sorpresas.</em></h1><p class="heading-copy">Registra cada evaluación con el porcentaje exacto de tu sílabo y mira cuánto necesitas.</p></div><button class="button button-secondary pressable" id="reset-grades" type="button">Restablecer ejemplos</button></div>
+            <div class="grade-summary panel"><div><span class="eyebrow">Promedio proyectado</span><strong id="overall-average">—</strong><p id="overall-status">Completa tus evaluaciones para ver el promedio.</p></div><div class="grade-summary-bars"><div><span>Aprobación estimada</span><div class="score-bar"><span id="overall-progress" style="width:0%"></span></div></div><small>Escala vigesimal · nota mínima de referencia: 10.5</small></div></div>
+            <div class="course-grade-grid" id="course-grade-grid"></div>
+            <p class="source-note">Los porcentajes se cargan desde los sílabos proporcionados. Si un curso no tiene ponderación legible, queda marcado como “por configurar” para que no se invente ningún criterio.</p>
+          </section>
+
+          <section class="view" id="view-plan" data-view-panel="plan" hidden>
+            <div class="page-heading compact-heading"><div><p class="eyebrow">Organización de estudio</p><h1>Tu plan, <em>en movimiento.</em></h1><p class="heading-copy">Tareas, lecturas y proyectos en un solo lugar, con foco en lo siguiente.</p></div><button class="button button-primary pressable" id="plan-add" type="button">＋ Añadir algo</button></div>
+            <div class="plan-grid"><section class="plan-column"><div class="column-heading"><div><span class="eyebrow">Ahora</span><h2>Tareas</h2></div><button class="small-plus" data-open-dialog="task-dialog" type="button" aria-label="Añadir tarea">＋</button></div><div id="task-list" class="stack-list"></div></section><section class="plan-column"><div class="column-heading"><div><span class="eyebrow">Biblioteca</span><h2>Libros y recursos</h2></div><button class="small-plus" data-open-dialog="book-dialog" type="button" aria-label="Añadir libro">＋</button></div><div id="book-list" class="stack-list"></div></section><section class="plan-column"><div class="column-heading"><div><span class="eyebrow">Construcción</span><h2>Proyectos</h2></div><button class="small-plus" data-open-dialog="project-dialog" type="button" aria-label="Añadir proyecto">＋</button></div><div id="project-list" class="stack-list"></div></section></div>
+            <div class="reminder-banner panel"><div class="reminder-icon">◷</div><div><strong>Recordatorios del navegador</strong><p>Activa las notificaciones para que las tareas con fecha no se queden escondidas.</p></div><button class="button button-secondary pressable" id="enable-notifications" type="button">Activar</button></div>
+          </section>
+
+          <section class="view" id="view-fechas" data-view-panel="fechas" hidden>
+            <div class="page-heading compact-heading"><div><p class="eyebrow">Calendario oficial · UNSCH</p><h1>Fechas que <em>marcan el ritmo.</em></h1><p class="heading-copy">Hitos del calendario académico y administrativo 2026-II presencial, reajustado.</p></div><a class="official-chip" href="https://enlinea.unsch.edu.pe/wp-content/uploads/2026/08/CALENDARIO-N2026-2-RCU-No-1618-2026-UNSCH-CU.pdf" target="_blank" rel="noreferrer">Abrir calendario oficial ↗</a></div>
+            <div class="date-highlight-grid"><article class="date-highlight"><span class="date-number">31</span><div><span class="eyebrow">Agosto 2026</span><h3>Inicio de clases</h3><p>El semestre entra en marcha.</p></div></article><article class="date-highlight hot"><span class="date-number">07</span><div><span class="eyebrow">Sep — Oct 2026</span><h3>Exoneración de cursos</h3><p>Solicitudes, expedientes y exámenes.</p></div></article><article class="date-highlight"><span class="date-number">23</span><div><span class="eyebrow">Diciembre 2026</span><h3>Final de clases</h3><p>Notas finales publicadas este mismo día.</p></div></article></div>
+            <div class="timeline panel" id="date-timeline"></div>
+            <p class="source-note">La franja de exoneración se registra como periodo oficial del 07 de septiembre al 30 de octubre de 2026. El tablero conserva el texto resumido para facilitar la planificación.</p>
+          </section>
+        </div>
+      </main>
+    </div>
+
+    <dialog class="form-dialog" id="task-dialog"><form method="dialog" id="task-form"><div class="dialog-heading"><div><span class="eyebrow">Organiza tu siguiente paso</span><h2>Nueva tarea</h2></div><button class="dialog-close" value="cancel" type="submit" aria-label="Cerrar">×</button></div><label for="task-title">Qué necesitas hacer</label><input id="task-title" name="title" required placeholder="Ej. Leer capítulo 2" /><div class="form-grid"><div><label for="task-course">Curso</label><select id="task-course" name="course"></select></div><div><label for="task-date">Fecha</label><input id="task-date" name="date" type="date" /></div></div><div class="form-grid"><div><label for="task-priority">Prioridad</label><select id="task-priority" name="priority"><option value="Alta">Alta</option><option value="Media" selected>Media</option><option value="Baja">Baja</option></select></div><label class="check-line dialog-check"><input id="task-reminder" name="reminder" type="checkbox" checked /><span>Recordarme</span></label></div><div class="dialog-actions"><button class="button button-secondary" value="cancel" type="submit">Cancelar</button><button class="button button-primary" id="save-task" value="default" type="submit">Guardar tarea</button></div></form></dialog>
+    <dialog class="form-dialog" id="book-dialog"><form method="dialog" id="book-form"><div class="dialog-heading"><div><span class="eyebrow">Biblioteca personal</span><h2>Añadir recurso</h2></div><button class="dialog-close" value="cancel" type="submit" aria-label="Cerrar">×</button></div><label for="book-title">Título o recurso</label><input id="book-title" name="title" required placeholder="Ej. Operating System Concepts" /><div class="form-grid"><div><label for="book-author">Autor / enlace corto</label><input id="book-author" name="author" placeholder="Silberschatz · PDF" /></div><div><label for="book-course">Curso</label><select id="book-course" name="course"></select></div></div><div class="dialog-actions"><button class="button button-secondary" value="cancel" type="submit">Cancelar</button><button class="button button-primary" value="default" type="submit">Guardar recurso</button></div></form></dialog>
+    <dialog class="form-dialog" id="project-dialog"><form method="dialog" id="project-form"><div class="dialog-heading"><div><span class="eyebrow">Portafolio y práctica</span><h2>Nuevo proyecto</h2></div><button class="dialog-close" value="cancel" type="submit" aria-label="Cerrar">×</button></div><label for="project-title">Nombre del proyecto</label><input id="project-title" name="title" required placeholder="Ej. Simulador de procesos" /><div class="form-grid"><div><label for="project-course">Curso / área</label><select id="project-course" name="course"></select></div><div><label for="project-status">Estado</label><select id="project-status" name="status"><option>Idea</option><option selected>En progreso</option><option>Listo</option></select></div></div><label for="project-note">Próximo entregable</label><input id="project-note" name="note" placeholder="Ej. Definir alcance y repositorio" /><div class="dialog-actions"><button class="button button-secondary" value="cancel" type="submit">Cancelar</button><button class="button button-primary" value="default" type="submit">Guardar proyecto</button></div></form></dialog>
+  </body>
+</html>
