@@ -23,7 +23,7 @@ jobs:
       - name: Cargar artefacto de Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: semester-planner-2026
+          path: .
 
   deploy:
     environment:
