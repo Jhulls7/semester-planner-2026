@@ -62,9 +62,9 @@ h2 { letter-spacing: -0.025em; line-height: 1.12; }
 .auth-form input::placeholder, .form-dialog input::placeholder { color: var(--text-dim); }
 .auth-form input:focus, .form-dialog input:focus, .form-dialog select:focus { border-color: rgba(34, 211, 238, .72); box-shadow: 0 0 0 4px var(--primary-soft); }
 .pin-input { position: absolute; width: 1px !important; height: 1px; padding: 0 !important; opacity: 0; pointer-events: none; }
-.pin-display { display: flex; justify-content: center; gap: 14px; margin: 6px 0 22px; }
-.pin-display span { width: 13px; height: 13px; border: 1px solid var(--text-dim); border-radius: 50%; background: transparent; transition: background 140ms ease, border-color 140ms ease, transform 140ms ease; }
-.pin-display span.is-filled { border-color: var(--primary); background: var(--primary); transform: scale(1.08); box-shadow: 0 0 0 5px var(--primary-soft); }
+.pin-display { display: flex; justify-content: center; gap: 16px; min-height: 26px; margin: 6px 0 22px; }
+.pin-dot { display: block; flex: 0 0 16px; width: 16px; height: 16px; border: 2px solid var(--text-dim); border-radius: 50%; background: transparent; transition: background 140ms ease, border-color 140ms ease, transform 140ms ease, box-shadow 140ms ease; }
+.pin-dot[data-filled="true"], .pin-dot.is-filled { border-color: var(--primary); background: var(--primary); transform: scale(1.08); box-shadow: 0 0 0 5px var(--primary-soft), 0 0 16px rgba(34, 211, 238, .35); }
 .pin-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 11px; max-width: 248px; margin: 0 auto 18px; }
 .pin-key { display: grid; place-items: center; width: 64px; height: 52px; margin: 0 auto; border: 1px solid var(--line-strong); border-radius: 16px; background: rgba(8, 13, 27, .54); color: var(--text); font-family: 'Space Grotesk', sans-serif; font-size: 1.15rem; font-weight: 600; transition: transform 100ms ease-out, background 160ms ease, border-color 160ms ease, color 160ms ease; }
 .pin-key:hover { border-color: rgba(34, 211, 238, .58); background: var(--primary-soft); color: var(--primary); }

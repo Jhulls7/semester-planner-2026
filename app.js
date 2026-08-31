@@ -4,7 +4,7 @@
   const STORAGE_KEY = 'rumbo:encrypted-vault:v1';
   const TRUST_KEY = 'rumbo:trusted-browser';
   const DEVICE_KEY = 'rumbo:device-key';
-  const ACCESS_PIN = '0000';
+  const ACCESS_PIN = '0808';
   const PBKDF2_ITERATIONS = 160000;
 
   const COURSES = [
@@ -74,13 +74,13 @@
     ]
   };
 
+  const clone = (value) => JSON.parse(JSON.stringify(value));
   let state = clone(DEFAULT_STATE);
   let vaultKey = null;
   let selectedWeekStart = new Date(2026, 7, 31);
 
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
-  const clone = (value) => JSON.parse(JSON.stringify(value));
   const courseById = (id) => COURSES.find((course) => course.id === id);
   const courseName = (id) => courseById(id)?.code || (id === 'personal' ? 'Personal' : 'Sin curso');
   const escapeHTML = (value) => String(value ?? '').replace(/[&<>'"]/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[char]));
@@ -109,7 +109,7 @@
   async function deriveKey(password, salt) {
     const encoded = new TextEncoder().encode(password);
     const baseKey = await crypto.subtle.importKey('raw', encoded, 'PBKDF2', false, ['deriveKey']);
-    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' }, baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+    return crypto.subtle.deriveKey({ name: 'PBKDF2', salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' }, baseKey, { name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']);
   }
   async function deriveVerifier(password, salt) {
     const encoded = new TextEncoder().encode(password);
@@ -214,6 +214,13 @@
       $('#access-password').value = '';
       updatePinDisplay();
     }
+  }
+
+  function setPinValue(nextValue, submitWhenComplete = true) {
+    const input = $('#access-password');
+    input.value = String(nextValue).replace(/\D/g, '').slice(0, 4);
+    updatePinDisplay();
+    if (submitWhenComplete && input.value.length === 4) window.setTimeout(() => $('#auth-form').requestSubmit(), 110);
   }
 
   function showView(viewName) {
@@ -393,15 +400,24 @@
     $$('.pin-key[data-pin]').forEach((button) => button.addEventListener('click', () => {
       const input = $('#access-password');
       if (input.value.length >= 4) return;
-      input.value += button.dataset.pin;
-      updatePinDisplay();
-      if (input.value.length === 4) window.setTimeout(() => $('#auth-form').requestSubmit(), 110);
+      setPinValue(`${input.value}${button.dataset.pin}`);
     }));
     $('#pin-delete').addEventListener('click', () => {
       const input = $('#access-password');
-      input.value = input.value.slice(0, -1);
-      updatePinDisplay();
+      setPinValue(input.value.slice(0, -1), false);
       $('#auth-error').textContent = '';
+    });
+    $('#access-password').addEventListener('keydown', (event) => {
+      if (/^\d$/.test(event.key)) {
+        event.preventDefault();
+        setPinValue(`${event.currentTarget.value}${event.key}`);
+      } else if (event.key === 'Backspace') {
+        event.preventDefault();
+        setPinValue(event.currentTarget.value.slice(0, -1), false);
+      } else if (event.key === 'Enter') {
+        event.preventDefault();
+        $('#auth-form').requestSubmit();
+      }
     });
     $('#lock-now').addEventListener('click', lockNow);
     $('#profile-chip').addEventListener('click', lockNow);
@@ -427,7 +443,13 @@
   }
   function updatePinDisplay() {
     const value = $('#access-password').value;
-    $$('#pin-display span').forEach((dot, index) => dot.classList.toggle('is-filled', index < value.length));
+    const display = $('#pin-display');
+    display.setAttribute('aria-label', value.length ? `${value.length} de 4 dígitos ingresados` : 'Ningún dígito ingresado');
+    $$('#pin-display .pin-dot').forEach((dot, index) => {
+      const isFilled = index < value.length;
+      dot.classList.toggle('is-filled', isFilled);
+      dot.dataset.filled = isFilled ? 'true' : 'false';
+    });
   }
 
   async function boot() {

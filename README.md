@@ -4,7 +4,7 @@ Panel estático para el horario, las notas y la organización académica del sem
 
 ## Uso local
 
-Abre `index.html` desde un servidor estático local. El acceso usa el PIN `0000` con un teclado visual de cuatro dígitos; la opción de recordar el navegador permite entrar directamente en ese perfil. El contenido personal se cifra con Web Crypto (PBKDF2 + AES-GCM) y se guarda en el navegador.
+Abre `index.html` desde un servidor estático local. El acceso usa el PIN `0808` con un teclado visual de cuatro dígitos; la opción de recordar el navegador permite entrar directamente en ese perfil. El contenido personal se cifra con Web Crypto (PBKDF2 + AES-GCM) y se guarda en el navegador.
 
 Los cuatro sílabos de ingeniería solo exponen `IUPP 100%` sin desglose de criterios; la calculadora los deja como plantilla editable. PS-182 sí carga `33% + 33% + 34%` según el sílabo.
 
