@@ -8,15 +8,15 @@
   const PBKDF2_ITERATIONS = 160000;
 
   const COURSES = [
-    { id: 'is286', code: 'IS-286', name: 'Modelado y Análisis de Software', color: '#22d3ee', hours: 6, source: '08deebed-2242-49ec-805a-dbcf2dccabb2.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
-    { id: 'is380', code: 'IS-380', name: 'Sistemas operativos', color: '#a3e635', hours: 5, source: '08deebed-3c59-4468-8e5f-20c836c95d1a.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
-    { id: 'is384', code: 'IS-384', name: 'Sistemas digitales y arquitectura de computadoras', color: '#f59e0b', hours: 6, source: '08deebed-3e89-46d3-841a-1077815f914f.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
-    { id: 'is386', code: 'IS-386', name: 'Innovación tecnológica, creatividad y emprendimiento', color: '#fb7185', hours: 4, source: '08def703-15d4-43c6-8ac8-8625432715f3.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
-    { id: 'ps182', code: 'PS-182', name: 'Psicología y desarrollo humano', color: '#c084fc', hours: 4, source: 'Silabo_-_PS-182_-_Psicologia_y_desarrollo_Humano.pdf', provisional: false, weights: [{ name: 'Primer examen', weight: 33 }, { name: 'Segundo examen', weight: 33 }, { name: 'Trabajo grupal', weight: 34 }] }
+    { id: 'is286', code: 'IS-286', name: 'Modelado y Análisis de Software', room: 'H-202', color: '#22d3ee', hours: 6, source: '08deebed-2242-49ec-805a-dbcf2dccabb2.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
+    { id: 'is380', code: 'IS-380', name: 'Sistemas operativos', room: 'H-203', color: '#a3e635', hours: 5, source: '08deebed-3c59-4468-8e5f-20c836c95d1a.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
+    { id: 'is384', code: 'IS-384', name: 'Sistemas digitales y arquitectura de computadoras', room: 'H-203', color: '#f59e0b', hours: 6, source: '08deebed-3e89-46d3-841a-1077815f914f.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
+    { id: 'is386', code: 'IS-386', name: 'Innovación tecnológica, creatividad y emprendimiento', room: 'H-203', color: '#fb7185', hours: 4, source: '08def703-15d4-43c6-8ac8-8625432715f3.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
+    { id: 'ps182', code: 'PS-182', name: 'Psicología y desarrollo humano', room: 'H-206', color: '#c084fc', hours: 4, source: 'Silabo_-_PS-182_-_Psicologia_y_desarrollo_Humano.pdf', provisional: false, weights: [{ name: 'Primer examen', weight: 33 }, { name: 'Segundo examen', weight: 33 }, { name: 'Trabajo grupal', weight: 34 }] }
   ];
 
   const SESSIONS = [
-    { id: 'mon-is386', courseId: 'is386', day: 0, start: 7, end: 9, type: 'Práctica', status: 'pending', note: 'Falta definir' },
+    { id: 'mon-is386', courseId: 'is386', day: 0, start: 7, end: 9, type: 'Teoría', status: 'confirmed', note: 'Horario indicado' },
     { id: 'mon-is380', courseId: 'is380', day: 0, start: 9, end: 10, type: 'Teoría', status: 'confirmed', note: 'Horario indicado' },
     { id: 'tue-is286', courseId: 'is286', day: 1, start: 9, end: 11, type: 'Teoría', status: 'confirmed', note: 'Horario indicado' },
     { id: 'tue-is380', courseId: 'is380', day: 1, start: 9, end: 11, type: 'Teoría', status: 'confirmed', note: 'Horario indicado' },
@@ -101,6 +101,12 @@
   }
   function formatWeekDate(date) { return date.toLocaleDateString('es-PE', { day: '2-digit', month: 'short' }).replace('.', ''); }
   function addDays(date, days) { const next = new Date(date); next.setDate(next.getDate() + days); return next; }
+  function sameDay(first, second) { return first.getFullYear() === second.getFullYear() && first.getMonth() === second.getMonth() && first.getDate() === second.getDate(); }
+  function currentDate() { const now = new Date(); return new Date(now.getFullYear(), now.getMonth(), now.getDate()); }
+  function dayIndexForDate(date) { return (date.getDay() + 6) % 7; }
+  function formatTime(hour) { return `${String(hour).padStart(2, '0')}:00`; }
+  function formatLongDate(date) { return date.toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }); }
+  function isoDateKey(date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
   function normalizeState(saved) {
     const base = clone(DEFAULT_STATE);
     return { ...base, ...saved, grades: saved.grades || {}, tasks: saved.tasks || [], books: saved.books || [], projects: saved.projects || [] };
@@ -240,6 +246,7 @@
   function renderAll() {
     configureAuthScreen(true);
     populateCourseSelects();
+    renderTodayAgenda();
     renderCalendar();
     renderGrades();
     renderPlan();
@@ -252,6 +259,37 @@
   }
   function updateTaskMetric() { $('#metric-tasks').textContent = String(state.tasks.filter((task) => !task.done).length).padStart(2, '0'); }
 
+  function getConflictPairs() {
+    const pairs = [];
+    for (let day = 0; day < 7; day += 1) {
+      const sessions = SESSIONS.filter((session) => session.day === day).sort((a, b) => a.start - b.start);
+      sessions.forEach((session, index) => sessions.slice(index + 1).forEach((other) => {
+        if (session.start < other.end && session.end > other.start) pairs.push({ day, start: Math.max(session.start, other.start), end: Math.min(session.end, other.end), a: session, b: other });
+      }));
+    }
+    return pairs;
+  }
+
+  function renderTodayAgenda() {
+    const list = $('#today-agenda-list');
+    if (!list) return;
+    const today = currentDate();
+    const todayDay = dayIndexForDate(today);
+    const sessions = SESSIONS.filter((session) => session.day === todayDay).sort((a, b) => a.start - b.start);
+    const tasks = state.tasks.filter((task) => task.date === isoDateKey(today)).sort((a, b) => Number(a.done) - Number(b.done) || (a.priority || '').localeCompare(b.priority || ''));
+    const conflictPairs = getConflictPairs();
+    const hasConflict = (session) => conflictPairs.some((pair) => pair.a.id === session.id || pair.b.id === session.id);
+    const sessionMarkup = sessions.map((session) => {
+      const course = courseById(session.courseId);
+      return `<article class="today-agenda-item ${hasConflict(session) ? 'is-conflict' : ''}" style="--course-color:${course.color}"><div class="today-agenda-time">${formatTime(session.start)}<small>${formatTime(session.end)}</small></div><div class="today-agenda-copy"><span class="course-kicker">${course.code} · ${escapeHTML(course.name)}</span><strong>${escapeHTML(session.type)}</strong><span>Salón ${escapeHTML(course.room)} · ${session.status === 'pending' ? 'Pendiente · ' : ''}${escapeHTML(session.note)}</span></div>${hasConflict(session) ? '<span class="conflict-tag">Cruce</span>' : ''}</article>`;
+    }).join('');
+    const taskMarkup = tasks.map((task) => `<article class="today-agenda-item agenda-task ${task.done ? 'is-done' : ''}"><div class="today-agenda-time">Tarea<small>${task.done ? 'Lista' : 'Hoy'}</small></div><div class="today-agenda-copy"><span class="course-kicker">${courseName(task.courseId)}</span><strong>${escapeHTML(task.title)}</strong><span>${task.reminder ? 'Recordatorio activo' : 'Sin recordatorio'}</span></div><span class="priority priority-${String(task.priority).toLowerCase()}">${escapeHTML(task.priority)}</span></article>`).join('');
+    list.innerHTML = sessionMarkup || taskMarkup ? `${sessionMarkup}${taskMarkup}` : '<div class="today-agenda-empty"><strong>No hay cursos ni tareas para hoy.</strong><span>Tu agenda está despejada.</span></div>';
+    $('#dashboard-date').textContent = `Hoy · ${formatLongDate(today)}`;
+    $('#today-agenda-count').textContent = `${sessions.length} curso${sessions.length === 1 ? '' : 's'} · ${tasks.length} tarea${tasks.length === 1 ? '' : 's'}`;
+    $('#today-agenda-footer').textContent = tasks.length ? `${tasks.length} tarea${tasks.length === 1 ? '' : 's'} programada${tasks.length === 1 ? '' : 's'} para hoy.` : (sessions.length ? 'Cursos ordenados por hora · los cruces quedan señalados.' : 'Sin actividad académica registrada para hoy.');
+  }
+
   function renderCalendar() {
     const grid = $('#calendar-grid');
     if (!grid) return;
@@ -263,7 +301,7 @@
     grid.append(timeHeader);
     days.forEach((day, index) => {
       const header = document.createElement('div');
-      header.className = `day-header ${index === 0 ? 'is-today' : ''}`;
+      header.className = `day-header ${sameDay(day, currentDate()) ? 'is-today' : ''}`;
       header.innerHTML = `<span>${['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'][index]}</span><strong>${day.getDate()}</strong><small>${day.toLocaleDateString('es-PE', { month: 'short' }).replace('.', '')}</small>`;
       grid.append(header);
     });
@@ -285,19 +323,40 @@
     SESSIONS.forEach((session) => byDay[session.day].push(session));
     SESSIONS.forEach((session) => {
       const course = courseById(session.courseId);
-      const conflict = byDay[session.day].some((other) => other.id !== session.id && session.start < other.end && session.end > other.start);
+      const overlapping = byDay[session.day].filter((other) => session.start < other.end && session.end > other.start).sort((a, b) => a.start - b.start || a.id.localeCompare(b.id));
+      const conflict = overlapping.length > 1;
+      const conflictLane = conflict ? overlapping.findIndex((other) => other.id === session.id) : 0;
       const event = document.createElement('article');
       event.className = `schedule-event ${session.status === 'pending' ? 'is-pending' : ''} ${conflict ? 'is-conflict' : ''}`;
       event.style.gridColumn = String(session.day + 2);
       event.style.gridRow = `${session.start - 7 + 2} / span ${session.end - session.start}`;
       event.style.setProperty('--course-color', course.color);
-      event.innerHTML = `<div class="event-stripe"></div><div class="event-code">${course.code} ${conflict ? '<span class="conflict-tag">Cruce</span>' : ''}</div><strong>${escapeHTML(session.type)}</strong><span class="event-time">${String(session.start).padStart(2, '0')}:00 – ${String(session.end).padStart(2, '0')}:00</span><span class="event-status">${session.status === 'pending' ? 'Pendiente · ' : ''}${escapeHTML(session.note)}</span>`;
+      if (conflict) {
+        event.style.width = `calc((100% - 16px) / ${overlapping.length})`;
+        event.style.transform = `translateX(calc(${conflictLane} * (100% + 6px)))`;
+        event.setAttribute('aria-label', `${course.code}, cruce de horario, ${formatTime(session.start)} a ${formatTime(session.end)}`);
+      }
+      event.innerHTML = `<div class="event-stripe"></div><div class="event-code">${course.code} ${conflict ? '<span class="conflict-tag">Cruce</span>' : ''}</div><strong>${escapeHTML(session.type)}</strong><span class="event-time">${formatTime(session.start)} – ${formatTime(session.end)}</span><span class="event-room">Salón ${escapeHTML(course.room)}</span><span class="event-status">${session.status === 'pending' ? 'Pendiente · ' : ''}${escapeHTML(session.note)}</span>`;
       grid.append(event);
     });
     const confirmedHours = SESSIONS.filter((session) => session.status === 'confirmed').reduce((sum, session) => sum + session.end - session.start, 0);
     const pendingHours = SESSIONS.filter((session) => session.status === 'pending').reduce((sum, session) => sum + session.end - session.start, 0);
     $('#schedule-total').textContent = `${confirmedHours} h confirmadas · ${pendingHours} h provisionales · ${UNSCHEDULED.length} sin horario`;
+    $('#metric-schedule-summary').textContent = `${confirmedHours} h confirmadas · ${pendingHours} h provisionales · ${UNSCHEDULED.length} sin horario`;
+    $('#pending-blocks-count').textContent = `${SESSIONS.filter((session) => session.status === 'pending').length + UNSCHEDULED.length} bloques`;
     $('#week-current').textContent = `${formatWeekDate(days[0])} — ${formatWeekDate(days[6])}`;
+    $('#schedule-week-label').textContent = `Semana del ${formatLongDate(days[0])}`;
+    renderConflictPanel();
+  }
+
+  function renderConflictPanel() {
+    const panel = $('#conflict-panel');
+    if (!panel) return;
+    const pairs = getConflictPairs();
+    if (!pairs.length) { panel.hidden = true; panel.innerHTML = ''; return; }
+    panel.hidden = false;
+    const dayNames = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    panel.innerHTML = `<div class="conflict-panel-heading"><span class="conflict-alert-icon">!</span><div><span class="eyebrow">Atención inmediata</span><h2>${pairs.length} cruce${pairs.length === 1 ? '' : 's'} detectado${pairs.length === 1 ? '' : 's'}</h2><p>Los cursos enfrentados aparecen lado a lado en la cuadrícula para que no se oculten entre sí.</p></div></div><div class="conflict-list">${pairs.map((pair) => { const first = courseById(pair.a.courseId); const second = courseById(pair.b.courseId); return `<article class="conflict-item"><div><strong>${dayNames[pair.day]} · ${formatTime(pair.start)}–${formatTime(pair.end)}</strong><span>${first.code} · Salón ${first.room}</span></div><span class="conflict-vs">VS</span><div><strong>${second.code}</strong><span>Salón ${second.room}</span></div></article>`; }).join('')}</div>`;
   }
 
   function courseAverage(course) {
@@ -363,8 +422,8 @@
     $$('[data-task-toggle]').forEach((input) => input.addEventListener('change', handleTaskToggle));
     $$('[data-delete-type]').forEach((button) => button.addEventListener('click', handleDeleteItem));
   }
-  async function handleTaskToggle(event) { const task = state.tasks.find((item) => item.id === event.currentTarget.dataset.taskToggle); if (task) task.done = event.currentTarget.checked; await saveVault(); renderPlan(); updateTaskMetric(); }
-  async function handleDeleteItem(event) { const type = event.currentTarget.dataset.deleteType; const key = `${type}s`; state[key] = state[key].filter((item) => item.id !== event.currentTarget.dataset.deleteId); await saveVault(); renderPlan(); updateTaskMetric(); }
+  async function handleTaskToggle(event) { const task = state.tasks.find((item) => item.id === event.currentTarget.dataset.taskToggle); if (task) task.done = event.currentTarget.checked; await saveVault(); renderPlan(); updateTaskMetric(); renderTodayAgenda(); }
+  async function handleDeleteItem(event) { const type = event.currentTarget.dataset.deleteType; const key = `${type}s`; state[key] = state[key].filter((item) => item.id !== event.currentTarget.dataset.deleteId); await saveVault(); renderPlan(); updateTaskMetric(); renderTodayAgenda(); }
 
   function renderDates() {
     const timeline = $('#date-timeline');
@@ -379,7 +438,7 @@
     if (event.submitter?.value === 'cancel') return closeDialog(event.currentTarget);
     const form = event.currentTarget;
     state.tasks.push({ id: uid('task'), title: $('#task-title').value.trim(), courseId: $('#task-course').value, date: $('#task-date').value, priority: $('#task-priority').value, reminder: $('#task-reminder').checked, done: false });
-    await saveVault(); closeDialog(form); renderPlan(); updateTaskMetric();
+    await saveVault(); closeDialog(form); renderPlan(); updateTaskMetric(); renderTodayAgenda();
   }
   async function handleBookForm(event) {
     event.preventDefault();

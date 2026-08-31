@@ -79,7 +79,7 @@
           <section class="view is-visible" id="view-inicio" data-view-panel="inicio">
             <div class="page-heading fade-up">
               <div>
-                <p class="eyebrow">Lunes · 31 de agosto de 2026</p>
+                <p class="eyebrow" id="dashboard-date">Hoy · 31 de agosto de 2026</p>
                 <h1>Que tu semestre <em>tenga dirección.</em></h1>
                 <p class="heading-copy">Cinco cursos, una ruta clara y espacio para que lo pendiente deje de perseguirte.</p>
               </div>
@@ -88,21 +88,21 @@
 
             <div class="hero-mosaic">
               <article class="next-card panel panel-glow fade-up" style="--delay: 70ms">
-                <div class="card-topline"><span class="live-pill"><i></i> Hoy en tu agenda</span><span class="muted-label">09:00 — 10:00</span></div>
-                <div class="next-card-main"><div><p class="course-kicker">IS-380 · Sistemas operativos</p><h2>Teoría</h2><p class="location-line"><span>Campus presencial</span><span class="dot-separator"></span><span>Bloque confirmado</span></p></div><div class="time-orbit"><span>09</span><small>AM</small></div></div>
-                <div class="next-card-footer"><span>Después: laboratorio de Modelado · martes 09:00</span><button class="text-button" data-view-target="horario" type="button">Ver horario <span>→</span></button></div>
+                <div class="card-topline"><span class="live-pill"><i></i> Hoy en tu agenda</span><span class="muted-label" id="today-agenda-count">Cargando…</span></div>
+                <div class="today-agenda-list" id="today-agenda-list"></div>
+                <div class="next-card-footer"><span id="today-agenda-footer">Revisando tus cursos y tareas de hoy.</span><button class="text-button" data-view-target="horario" type="button">Ver horario <span>→</span></button></div>
               </article>
               <article class="focus-card panel fade-up" style="--delay: 140ms">
                 <div class="card-topline"><span class="eyebrow">Pulso del semestre</span><span class="signal-mark">◒</span></div>
                 <div class="focus-score"><strong>68</strong><span>%<br /><small>en marcha</small></span></div>
                 <div class="score-bar"><span style="width:68%"></span></div>
-                <p>Las clases empiezan hoy. Aún hay <strong>5 bloques</strong> por confirmar.</p>
+                <p>Las clases empiezan hoy. Aún hay <strong id="pending-blocks-count">4 bloques</strong> por confirmar.</p>
                 <button class="text-button" data-view-target="fechas" type="button">Revisar hitos <span>→</span></button>
               </article>
             </div>
 
             <div class="metric-grid fade-up" style="--delay: 210ms">
-              <article class="metric-card"><span class="metric-label">Cursos activos</span><strong>05</strong><span class="metric-note">9 h confirmadas · 8 h provisionales</span></article>
+              <article class="metric-card"><span class="metric-label">Cursos activos</span><strong>05</strong><span class="metric-note" id="metric-schedule-summary">11 h confirmadas · 6 h provisionales · 1 sin horario</span></article>
               <article class="metric-card"><span class="metric-label">Próxima ventana</span><strong>07 sep</strong><span class="metric-note">Exoneración de cursos</span></article>
               <article class="metric-card"><span class="metric-label">Tareas abiertas</span><strong id="metric-tasks">03</strong><span class="metric-note">Organizadas por prioridad</span></article>
               <article class="metric-card accent-metric"><span class="metric-label">Cierre de clases</span><strong>23 dic</strong><span class="metric-note">Publicación de notas el mismo día</span></article>
@@ -118,12 +118,13 @@
 
           <section class="view" id="view-horario" data-view-panel="horario" hidden>
             <div class="page-heading compact-heading">
-              <div><p class="eyebrow">Semana del 31 de agosto</p><h1>Horario <em>en contexto.</em></h1><p class="heading-copy">Los bloques con línea discontinua siguen sujetos a confirmación docente.</p></div>
+              <div><p class="eyebrow" id="schedule-week-label">Semana del 31 de agosto</p><h1>Horario <em>en contexto.</em></h1><p class="heading-copy">Los bloques con línea discontinua siguen sujetos a confirmación docente.</p></div>
               <div class="week-controls"><button class="icon-button" id="prev-week" type="button" aria-label="Semana anterior">←</button><button class="week-current" id="week-current" type="button">Esta semana</button><button class="icon-button" id="next-week" type="button" aria-label="Semana siguiente">→</button></div>
             </div>
             <div class="legend-row"><span><i class="legend-dot confirmed"></i> Confirmado por tu registro</span><span><i class="legend-dot pending"></i> Falta confirmar</span><span class="schedule-total" id="schedule-total">9 h confirmadas · 8 h provisionales · 1 sin horario</span></div>
             <div class="schedule-shell panel"><div class="schedule-scroll"><div class="calendar-grid" id="calendar-grid"></div></div></div>
             <div class="schedule-notes"><article class="note-strip"><span class="note-icon">i</span><div><strong>Por confirmar</strong><p>IS-286: laboratorio del viernes · IS-380: práctica sin día ni hora · IS-384: laboratorio · IS-386: práctica · PS-182: práctica no estática.</p></div></article><button class="button button-secondary pressable" data-open-dialog="task-dialog" type="button">＋ Añadir recordatorio</button></div>
+            <section class="conflict-panel panel" id="conflict-panel" hidden aria-live="polite"></section>
           </section>
 
           <section class="view" id="view-notas" data-view-panel="notas" hidden>

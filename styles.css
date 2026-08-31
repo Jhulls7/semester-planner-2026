@@ -139,6 +139,21 @@ h2 { letter-spacing: -0.025em; line-height: 1.12; }
 .live-pill i { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); box-shadow: 0 0 0 4px rgba(34,211,238,.1); }
 .muted-label { color: var(--text-dim); font-size: .75rem; }
 .next-card-main { display: flex; align-items: center; justify-content: space-between; gap: 20px; min-height: 160px; }
+.today-agenda-list { display: grid; gap: 9px; min-height: 166px; margin-top: 18px; align-content: start; }
+.today-agenda-item { position: relative; display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; align-items: center; gap: 11px; padding: 10px 12px; border: 1px solid color-mix(in srgb, var(--course-color, var(--primary)) 34%, transparent); border-radius: 13px; background: color-mix(in srgb, var(--course-color, var(--primary)) 9%, #11182d); }
+.today-agenda-item.is-conflict { border-color: rgba(251, 113, 133, .75); background: rgba(251, 113, 133, .14); box-shadow: 0 0 0 1px rgba(251, 113, 133, .14); }
+.today-agenda-time { color: var(--course-color, var(--primary)); font-family: 'Space Grotesk', sans-serif; font-size: .75rem; font-weight: 700; line-height: 1.1; }
+.today-agenda-time small { display: block; margin-top: 4px; color: var(--text-dim); font-family: 'IBM Plex Sans', sans-serif; font-size: .65rem; font-weight: 500; }
+.today-agenda-copy { min-width: 0; display: grid; gap: 2px; }
+.today-agenda-copy .course-kicker { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.today-agenda-copy strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .83rem; }
+.today-agenda-copy > span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-dim); font-size: .66rem; }
+.today-agenda-item .conflict-tag { align-self: start; margin-top: 1px; }
+.agenda-task { --course-color: var(--accent); border-color: rgba(245, 158, 11, .3); background: rgba(245, 158, 11, .08); }
+.agenda-task.is-done { opacity: .58; }
+.today-agenda-empty { display: grid; align-content: center; min-height: 166px; color: var(--text-soft); }
+.today-agenda-empty strong { font-size: 1rem; }
+.today-agenda-empty span { margin-top: 4px; color: var(--text-dim); font-size: .78rem; }
 .course-kicker { color: var(--text-dim); font-size: .74rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; }
 .next-card h2 { margin-top: 8px; font-size: clamp(2.1rem, 4vw, 3.3rem); }
 .location-line { display: flex; align-items: center; gap: 10px; margin-top: 13px; color: var(--text-soft); font-size: .78rem; }
@@ -212,11 +227,24 @@ h2 { letter-spacing: -0.025em; line-height: 1.12; }
 .event-code { display: flex; align-items: center; gap: 6px; color: var(--course-color); font-family: 'Space Grotesk', sans-serif; font-size: .66rem; font-weight: 700; letter-spacing: .04em; }
 .schedule-event strong { margin-top: 2px; color: var(--text); font-size: .8rem; }
 .event-time { margin-top: 3px; color: var(--text-soft); font-size: .68rem; }
+.event-room { margin-top: 2px; color: var(--text-soft); font-size: .63rem; }
 .event-status { margin-top: auto; color: var(--text-dim); font-size: .62rem; line-height: 1.25; }
 .schedule-event.is-pending { border-style: dashed; border-color: color-mix(in srgb, var(--accent) 58%, transparent); background: rgba(245, 158, 11, .07); }
 .schedule-event.is-pending .event-stripe { background: repeating-linear-gradient(180deg, var(--accent) 0 6px, transparent 6px 10px); }
 .schedule-event.is-conflict { border-color: rgba(251, 113, 133, .7); background: rgba(251, 113, 133, .12); }
 .conflict-tag { padding: 2px 5px; border-radius: 5px; background: rgba(251, 113, 133, .16); color: var(--danger); font-family: 'IBM Plex Sans', sans-serif; font-size: .58rem; letter-spacing: 0; }
+.conflict-panel { margin-top: 16px; padding: 19px 20px; border-color: rgba(251, 113, 133, .34); background: linear-gradient(145deg, rgba(71, 31, 54, .54), rgba(17, 24, 45, .72)); }
+.conflict-panel-heading { display: flex; align-items: flex-start; gap: 12px; }
+.conflict-alert-icon { display: grid; place-items: center; flex: 0 0 auto; width: 28px; height: 28px; border: 1px solid rgba(251, 113, 133, .55); border-radius: 9px; background: rgba(251, 113, 133, .14); color: var(--danger); font-weight: 700; }
+.conflict-panel h2 { margin-top: 4px; color: var(--danger); font-size: 1.12rem; }
+.conflict-panel p { margin-top: 4px; color: var(--text-soft); font-size: .75rem; }
+.conflict-list { display: grid; gap: 8px; margin-top: 15px; }
+.conflict-item { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 13px; padding-top: 11px; border-top: 1px solid rgba(251, 113, 133, .17); }
+.conflict-item > div { display: grid; gap: 2px; min-width: 0; }
+.conflict-item > div:last-child { text-align: right; }
+.conflict-item strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: .78rem; }
+.conflict-item span:not(.conflict-vs) { color: var(--text-dim); font-size: .68rem; }
+.conflict-vs { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: rgba(251, 113, 133, .14); color: var(--danger); font-family: 'Space Grotesk', sans-serif; font-size: .58rem; font-weight: 700; }
 .schedule-notes { align-items: stretch; margin-top: 16px; }
 .note-strip { display: flex; align-items: start; gap: 11px; flex: 1; padding: 14px 16px; border: 1px solid rgba(245, 158, 11, .2); border-radius: var(--radius-sm); background: var(--accent-soft); }
 .note-icon { display: grid; place-items: center; width: 19px; height: 19px; border: 1px solid rgba(245, 158, 11, .55); border-radius: 50%; color: var(--accent); font-size: .72rem; }
@@ -372,6 +400,9 @@ h2 { letter-spacing: -0.025em; line-height: 1.12; }
   .content-wrap { padding: 30px 16px 100px; }
   .page-heading h1 { font-size: 2.45rem; }
   .heading-copy { font-size: .9rem; }
+  .today-agenda-item { grid-template-columns: 48px minmax(0, 1fr) auto; padding: 9px 10px; }
+  .conflict-panel-heading { gap: 9px; }
+  .conflict-item { gap: 8px; }
   .next-card-main { min-height: 140px; }
   .time-orbit { padding: 17px 13px; }
   .time-orbit span { font-size: 3rem; }
