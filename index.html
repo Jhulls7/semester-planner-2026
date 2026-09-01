@@ -9,8 +9,8 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=20260831-0808-fix" />
-    <script defer src="app.js?v=20260831-0808-fix"></script>
+    <link rel="stylesheet" href="styles.css?v=20260901-course-modal" />
+    <script defer src="app.js?v=20260901-course-modal"></script>
   </head>
   <body>
     <div class="ambient ambient-one" aria-hidden="true"></div>
@@ -153,5 +153,48 @@
     <dialog class="form-dialog" id="task-dialog"><form method="dialog" id="task-form"><div class="dialog-heading"><div><span class="eyebrow">Organiza tu siguiente paso</span><h2>Nueva tarea</h2></div><button class="dialog-close" value="cancel" type="submit" aria-label="Cerrar">×</button></div><label for="task-title">Qué necesitas hacer</label><input id="task-title" name="title" required placeholder="Ej. Leer capítulo 2" /><div class="form-grid"><div><label for="task-course">Curso</label><select id="task-course" name="course"></select></div><div><label for="task-date">Fecha</label><input id="task-date" name="date" type="date" /></div></div><div class="form-grid"><div><label for="task-priority">Prioridad</label><select id="task-priority" name="priority"><option value="Alta">Alta</option><option value="Media" selected>Media</option><option value="Baja">Baja</option></select></div><label class="check-line dialog-check"><input id="task-reminder" name="reminder" type="checkbox" checked /><span>Recordarme</span></label></div><div class="dialog-actions"><button class="button button-secondary" value="cancel" type="submit">Cancelar</button><button class="button button-primary" id="save-task" value="default" type="submit">Guardar tarea</button></div></form></dialog>
     <dialog class="form-dialog" id="book-dialog"><form method="dialog" id="book-form"><div class="dialog-heading"><div><span class="eyebrow">Biblioteca personal</span><h2>Añadir recurso</h2></div><button class="dialog-close" value="cancel" type="submit" aria-label="Cerrar">×</button></div><label for="book-title">Título o recurso</label><input id="book-title" name="title" required placeholder="Ej. Operating System Concepts" /><div class="form-grid"><div><label for="book-author">Autor / enlace corto</label><input id="book-author" name="author" placeholder="Silberschatz · PDF" /></div><div><label for="book-course">Curso</label><select id="book-course" name="course"></select></div></div><div class="dialog-actions"><button class="button button-secondary" value="cancel" type="submit">Cancelar</button><button class="button button-primary" value="default" type="submit">Guardar recurso</button></div></form></dialog>
     <dialog class="form-dialog" id="project-dialog"><form method="dialog" id="project-form"><div class="dialog-heading"><div><span class="eyebrow">Portafolio y práctica</span><h2>Nuevo proyecto</h2></div><button class="dialog-close" value="cancel" type="submit" aria-label="Cerrar">×</button></div><label for="project-title">Nombre del proyecto</label><input id="project-title" name="title" required placeholder="Ej. Simulador de procesos" /><div class="form-grid"><div><label for="project-course">Curso / área</label><select id="project-course" name="course"></select></div><div><label for="project-status">Estado</label><select id="project-status" name="status"><option>Idea</option><option selected>En progreso</option><option>Listo</option></select></div></div><label for="project-note">Próximo entregable</label><input id="project-note" name="note" placeholder="Ej. Definir alcance y repositorio" /><div class="dialog-actions"><button class="button button-secondary" value="cancel" type="submit">Cancelar</button><button class="button button-primary" value="default" type="submit">Guardar proyecto</button></div></form></dialog>
+    <dialog class="course-dialog" id="course-dialog" aria-labelledby="course-dialog-title">
+      <div class="course-dialog-header">
+        <div class="course-dialog-heading">
+          <span class="course-kicker" id="course-dialog-code">Curso</span>
+          <h2 id="course-dialog-title">Información de la asignatura</h2>
+          <p id="course-dialog-subtitle"></p>
+        </div>
+        <button class="dialog-close" id="course-dialog-close" type="button" aria-label="Cerrar información del curso">×</button>
+      </div>
+
+      <section id="course-summary-view" class="course-dialog-view">
+        <span class="eyebrow">Resumen de la asignatura</span>
+        <div class="course-meta-grid">
+          <div class="course-meta-item"><span>Docente</span><strong id="course-summary-teacher">Por confirmar</strong></div>
+          <div class="course-meta-item"><span>Sección</span><strong id="course-summary-section">Por confirmar</strong></div>
+          <div class="course-meta-item"><span>Aula</span><strong id="course-summary-room">Por confirmar</strong></div>
+          <div class="course-meta-item"><span>Créditos</span><strong id="course-summary-credits">—</strong></div>
+          <div class="course-meta-item"><span>Carga semanal</span><strong id="course-summary-hours">—</strong></div>
+          <div class="course-meta-item"><span>Clasificación</span><strong id="course-summary-support">Sin clasificación</strong></div>
+        </div>
+        <div class="course-schedule-heading"><span class="eyebrow">Horario general</span><span class="course-dialog-rule"></span></div>
+        <ul class="course-schedule-list" id="course-summary-schedule"></ul>
+        <p class="course-summary-status" id="course-summary-status"></p>
+        <div class="course-dialog-actions"><button class="button button-primary pressable" id="course-detail-button" type="button">Ver información completa <span>→</span></button></div>
+      </section>
+
+      <section id="course-detail-view" class="course-dialog-view" hidden>
+        <button class="course-back-button" id="course-summary-back" type="button">← Volver al resumen</button>
+        <span class="eyebrow" id="course-detail-kicker">Información completa</span>
+        <h3 class="course-detail-title">Configura tu nota</h3>
+        <p class="course-detail-copy">Los datos generales son solo de consulta. Aquí únicamente puedes ajustar el porcentaje asignado a cada actividad de evaluación.</p>
+        <form id="course-weights-form">
+          <div class="course-detail-section-heading"><div><span class="eyebrow">Evaluación</span><h4>Ponderaciones del sílabo</h4></div><span class="course-weight-total" id="course-weights-total">100%</span></div>
+          <div class="course-weight-rows" id="course-weights-rows"></div>
+          <p class="course-form-error" id="course-weights-error" role="alert"></p>
+          <div class="course-support"><label for="course-support-select">Clasificación opcional</label><select id="course-support-select"><option value="">Sin clasificación</option><option value="Apoyo académico">Apoyo académico</option><option value="Recuperación">Recuperación</option><option value="Práctica adicional">Práctica adicional</option></select><small>Úsala para distinguir apoyos o actividades extra sin alterar la nota automáticamente.</small></div>
+          <div class="course-dialog-actions"><span class="course-save-status" id="course-weights-status" aria-live="polite"></span><button class="button button-primary pressable" type="submit">Guardar cambios</button></div>
+        </form>
+        <div class="course-recovery" id="course-recovery"></div>
+        <p class="course-detail-source" id="course-detail-source"></p>
+        <p class="course-minimum-note">Nota mínima aprobativa: <strong>10.5 / 20</strong>.</p>
+      </section>
+    </dialog>
   </body>
 </html>

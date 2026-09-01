@@ -6,13 +6,14 @@
   const DEVICE_KEY = 'rumbo:device-key';
   const ACCESS_PIN = '0808';
   const PBKDF2_ITERATIONS = 160000;
+  const MIN_PASS_GRADE = 10.5;
 
   const COURSES = [
-    { id: 'is286', code: 'IS-286', name: 'Modelado y Análisis de Software', room: 'H-202', color: '#22d3ee', hours: 6, source: '08deebed-2242-49ec-805a-dbcf2dccabb2.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
-    { id: 'is380', code: 'IS-380', name: 'Sistemas operativos', room: 'H-203', color: '#a3e635', hours: 5, source: '08deebed-3c59-4468-8e5f-20c836c95d1a.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
-    { id: 'is384', code: 'IS-384', name: 'Sistemas digitales y arquitectura de computadoras', room: 'H-203', color: '#f59e0b', hours: 6, source: '08deebed-3e89-46d3-841a-1077815f914f.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
-    { id: 'is386', code: 'IS-386', name: 'Innovación tecnológica, creatividad y emprendimiento', room: 'H-203', color: '#fb7185', hours: 4, source: '08def703-15d4-43c6-8ac8-8625432715f3.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
-    { id: 'ps182', code: 'PS-182', name: 'Psicología y desarrollo humano', room: 'H-206', color: '#c084fc', hours: 4, source: 'Silabo_-_PS-182_-_Psicologia_y_desarrollo_Humano.pdf', provisional: false, weights: [{ name: 'Primer examen', weight: 33 }, { name: 'Segundo examen', weight: 33 }, { name: 'Trabajo grupal', weight: 34 }] }
+    { id: 'is286', code: 'IS-286', name: 'Modelado y Análisis de Software', room: 'H-202', teacher: 'Por confirmar', section: 'Por confirmar', credits: 4, color: '#22d3ee', hours: 6, source: '08deebed-2242-49ec-805a-dbcf2dccabb2.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
+    { id: 'is380', code: 'IS-380', name: 'Sistemas operativos', room: 'H-203', teacher: 'Por confirmar', section: 'Por confirmar', credits: 4, color: '#a3e635', hours: 5, source: '08deebed-3c59-4468-8e5f-20c836c95d1a.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
+    { id: 'is384', code: 'IS-384', name: 'Sistemas digitales y arquitectura de computadoras', room: 'H-203', teacher: 'Por confirmar', section: 'Por confirmar', credits: 4, color: '#f59e0b', hours: 6, source: '08deebed-3e89-46d3-841a-1077815f914f.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
+    { id: 'is386', code: 'IS-386', name: 'Innovación tecnológica, creatividad y emprendimiento', room: 'H-203', teacher: 'Por confirmar', section: 'Por confirmar', credits: 3, color: '#fb7185', hours: 4, source: '08def703-15d4-43c6-8ac8-8625432715f3.pdf', provisional: true, weights: [{ name: 'IUPP · criterios por confirmar', weight: 100 }] },
+    { id: 'ps182', code: 'PS-182', name: 'Psicología y desarrollo humano', room: 'H-206', teacher: 'Por confirmar', section: 'Por confirmar', credits: 3, color: '#c084fc', hours: 4, source: 'Silabo_-_PS-182_-_Psicologia_y_desarrollo_Humano.pdf', provisional: false, weights: [{ name: 'Primer examen', weight: 33 }, { name: 'Segundo examen', weight: 33 }, { name: 'Trabajo grupal', weight: 34 }] }
   ];
 
   const SESSIONS = [
@@ -59,6 +60,8 @@
 
   const DEFAULT_STATE = {
     grades: {},
+    weightOverrides: {},
+    courseSupport: {},
     tasks: [
       { id: 't1', title: 'Pedir confirmación de práctica IS-380', courseId: 'is380', date: '2026-09-04', priority: 'Alta', reminder: true, done: false },
       { id: 't2', title: 'Guardar ponderaciones de cada sílabo', courseId: 'ps182', date: '2026-09-04', priority: 'Alta', reminder: true, done: false },
@@ -78,6 +81,7 @@
   let state = clone(DEFAULT_STATE);
   let vaultKey = null;
   let selectedWeekStart = new Date(2026, 7, 31);
+  let activeCourseId = null;
 
   const $ = (selector, root = document) => root.querySelector(selector);
   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -109,7 +113,8 @@
   function isoDateKey(date) { return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`; }
   function normalizeState(saved) {
     const base = clone(DEFAULT_STATE);
-    return { ...base, ...saved, grades: saved.grades || {}, tasks: saved.tasks || [], books: saved.books || [], projects: saved.projects || [] };
+    saved = saved || {};
+    return { ...base, ...saved, grades: saved.grades || {}, weightOverrides: saved.weightOverrides || {}, courseSupport: saved.courseSupport || {}, tasks: saved.tasks || [], books: saved.books || [], projects: saved.projects || [] };
   }
 
   async function deriveKey(password, salt) {
@@ -281,7 +286,7 @@
     const hasConflict = (session) => conflictPairs.some((pair) => pair.a.id === session.id || pair.b.id === session.id);
     const sessionMarkup = sessions.map((session) => {
       const course = courseById(session.courseId);
-      return `<article class="today-agenda-item ${hasConflict(session) ? 'is-conflict' : ''}" style="--course-color:${course.color}"><div class="today-agenda-time">${formatTime(session.start)}<small>${formatTime(session.end)}</small></div><div class="today-agenda-copy"><span class="course-kicker">${course.code} · ${escapeHTML(course.name)}</span><strong>${escapeHTML(session.type)}</strong><span>Salón ${escapeHTML(course.room)} · ${session.status === 'pending' ? 'Pendiente · ' : ''}${escapeHTML(session.note)}</span></div>${hasConflict(session) ? '<span class="conflict-tag">Cruce</span>' : ''}</article>`;
+      return `<article class="today-agenda-item ${hasConflict(session) ? 'is-conflict' : ''}" data-open-course="${course.id}" role="button" tabindex="0" aria-label="Abrir información de ${escapeHTML(course.code)}" style="--course-color:${course.color}"><div class="today-agenda-time">${formatTime(session.start)}<small>${formatTime(session.end)}</small></div><div class="today-agenda-copy"><span class="course-kicker">${course.code} · ${escapeHTML(course.name)}</span><strong>${escapeHTML(session.type)}</strong><span>Salón ${escapeHTML(course.room)} · ${session.status === 'pending' ? 'Pendiente · ' : ''}${escapeHTML(session.note)}</span></div>${hasConflict(session) ? '<span class="conflict-tag">Cruce</span>' : ''}</article>`;
     }).join('');
     const taskMarkup = tasks.map((task) => `<article class="today-agenda-item agenda-task ${task.done ? 'is-done' : ''}"><div class="today-agenda-time">Tarea<small>${task.done ? 'Lista' : 'Hoy'}</small></div><div class="today-agenda-copy"><span class="course-kicker">${courseName(task.courseId)}</span><strong>${escapeHTML(task.title)}</strong><span>${task.reminder ? 'Recordatorio activo' : 'Sin recordatorio'}</span></div><span class="priority priority-${String(task.priority).toLowerCase()}">${escapeHTML(task.priority)}</span></article>`).join('');
     list.innerHTML = sessionMarkup || taskMarkup ? `${sessionMarkup}${taskMarkup}` : '<div class="today-agenda-empty"><strong>No hay cursos ni tareas para hoy.</strong><span>Tu agenda está despejada.</span></div>';
@@ -328,13 +333,16 @@
       const conflictLane = conflict ? overlapping.findIndex((other) => other.id === session.id) : 0;
       const event = document.createElement('article');
       event.className = `schedule-event ${session.status === 'pending' ? 'is-pending' : ''} ${conflict ? 'is-conflict' : ''}`;
+      event.dataset.openCourse = course.id;
+      event.setAttribute('role', 'button');
+      event.tabIndex = 0;
+      event.setAttribute('aria-label', `Abrir información de ${course.code}, ${session.type}, ${formatTime(session.start)} a ${formatTime(session.end)}`);
       event.style.gridColumn = String(session.day + 2);
       event.style.gridRow = `${session.start - 7 + 2} / span ${session.end - session.start}`;
       event.style.setProperty('--course-color', course.color);
       if (conflict) {
         event.style.width = `calc((100% - 16px) / ${overlapping.length})`;
         event.style.transform = `translateX(calc(${conflictLane} * (100% + 6px)))`;
-        event.setAttribute('aria-label', `${course.code}, cruce de horario, ${formatTime(session.start)} a ${formatTime(session.end)}`);
       }
       event.innerHTML = `<div class="event-stripe"></div><div class="event-code">${course.code} ${conflict ? '<span class="conflict-tag">Cruce</span>' : ''}</div><strong>${escapeHTML(session.type)}</strong><span class="event-time">${formatTime(session.start)} – ${formatTime(session.end)}</span><span class="event-room">Salón ${escapeHTML(course.room)}</span><span class="event-status">${session.status === 'pending' ? 'Pendiente · ' : ''}${escapeHTML(session.note)}</span>`;
       grid.append(event);
@@ -359,11 +367,16 @@
     panel.innerHTML = `<div class="conflict-panel-heading"><span class="conflict-alert-icon">!</span><div><span class="eyebrow">Atención inmediata</span><h2>${pairs.length} cruce${pairs.length === 1 ? '' : 's'} detectado${pairs.length === 1 ? '' : 's'}</h2><p>Los cursos enfrentados aparecen lado a lado en la cuadrícula para que no se oculten entre sí.</p></div></div><div class="conflict-list">${pairs.map((pair) => { const first = courseById(pair.a.courseId); const second = courseById(pair.b.courseId); return `<article class="conflict-item"><div><strong>${dayNames[pair.day]} · ${formatTime(pair.start)}–${formatTime(pair.end)}</strong><span>${first.code} · Salón ${first.room}</span></div><span class="conflict-vs">VS</span><div><strong>${second.code}</strong><span>Salón ${second.room}</span></div></article>`; }).join('')}</div>`;
   }
 
+  function courseWeights(course) {
+    return state.weightOverrides?.[course.id]?.length ? state.weightOverrides[course.id] : course.weights;
+  }
+
   function courseAverage(course) {
     const entries = state.grades[course.id] || {};
+    const weights = courseWeights(course);
     let knownWeight = 0;
     let contribution = 0;
-    course.weights.forEach((item, index) => {
+    weights.forEach((item, index) => {
       const note = Number(entries[index]);
       if (Number.isFinite(note) && note >= 0 && note <= 20) {
         knownWeight += item.weight;
@@ -373,7 +386,7 @@
     const remainingWeight = 100 - knownWeight;
     const projected = knownWeight ? contribution / (knownWeight / 100) : null;
     const final = remainingWeight === 0 ? contribution : null;
-    const needed = remainingWeight > 0 ? Math.max(0, Math.min(20, (11 - contribution) / (remainingWeight / 100))) : null;
+    const needed = remainingWeight > 0 ? Math.max(0, Math.min(20, (MIN_PASS_GRADE - contribution) / (remainingWeight / 100))) : null;
     return { knownWeight, contribution, remainingWeight, projected, final, needed };
   }
   function renderGrades() {
@@ -383,10 +396,10 @@
       const entries = state.grades[course.id] || {};
       const result = courseAverage(course);
       const scoreLabel = result.final !== null ? result.final.toFixed(2) : result.projected !== null ? `${result.projected.toFixed(2)}*` : '—';
-      const note = result.final !== null ? (result.final >= 10.5 ? 'Aprobación estimada' : 'Requiere refuerzo') : result.knownWeight ? `${result.knownWeight}% cargado · fórmula parcial` : 'Aún sin evaluaciones';
-      const fields = course.weights.map((item, index) => `<div class="grade-row"><div><strong>${escapeHTML(item.name)}</strong><span>${item.weight}% del curso</span></div><input class="grade-input focus-glow" data-course="${course.id}" data-grade-index="${index}" type="number" min="0" max="20" step="0.1" inputmode="decimal" value="${entries[index] ?? ''}" placeholder="—" aria-label="Nota de ${escapeHTML(item.name)}" /></div>`).join('');
+      const note = result.final !== null ? (result.final >= MIN_PASS_GRADE ? 'Aprobación estimada' : 'Requiere refuerzo') : result.knownWeight ? `${result.knownWeight}% cargado · fórmula parcial` : 'Aún sin evaluaciones';
+      const fields = courseWeights(course).map((item, index) => `<div class="grade-row"><div><strong>${escapeHTML(item.name)}</strong><span>${item.weight}% del curso</span></div><input class="grade-input focus-glow" data-course="${course.id}" data-grade-index="${index}" type="number" min="0" max="20" step="0.1" inputmode="decimal" value="${entries[index] ?? ''}" placeholder="—" aria-label="Nota de ${escapeHTML(item.name)}" /></div>`).join('');
       const needed = result.needed === null ? result.final !== null ? 'Ponderación completa' : '—' : result.needed.toFixed(2);
-      return `<article class="grade-card panel fade-up" style="--delay:${courseIndex * 55}ms;--course-color:${course.color}"><div class="grade-card-head"><div><span class="course-kicker">${course.code}</span><h2>${escapeHTML(course.name)}</h2></div><div class="course-score"><strong>${scoreLabel}</strong><span>/ 20</span></div></div><div class="grade-badges"><span class="course-dot" style="background:${course.color}"></span><span>${course.provisional ? 'Ponderación IUPP · por configurar' : 'Ponderación cargada desde sílabo'}</span><span class="grade-status">${note}</span></div><div class="grade-rows">${fields}</div><div class="grade-card-foot"><span>Para llegar a 11: <strong>${needed}${result.needed !== null ? ' en lo restante' : ''}</strong></span><span class="grade-source">${escapeHTML(course.source)}</span></div></article>`;
+      return `<article class="grade-card panel fade-up" style="--delay:${courseIndex * 55}ms;--course-color:${course.color}"><div class="grade-card-head"><div><span class="course-kicker">${course.code}</span><h2>${escapeHTML(course.name)}</h2></div><div class="course-score"><strong>${scoreLabel}</strong><span>/ 20</span></div></div><div class="grade-badges"><span class="course-dot" style="background:${course.color}"></span><span>${course.provisional ? 'Ponderación IUPP · por configurar' : 'Ponderación cargada desde sílabo'}</span><span class="grade-status">${note}</span></div><div class="grade-rows">${fields}</div><div class="grade-card-foot"><span>Para llegar a ${MIN_PASS_GRADE}: <strong>${needed}${result.needed !== null ? ' en lo restante' : ''}</strong></span><span class="grade-source">${escapeHTML(course.source)}</span></div></article>`;
     }).join('');
     $$('.grade-input').forEach((input) => input.addEventListener('change', handleGradeChange));
     updateOverallGrade();
@@ -429,6 +442,106 @@
     const timeline = $('#date-timeline');
     if (!timeline) return;
     timeline.innerHTML = ACADEMIC_DATES.map((item) => `<article class="timeline-item ${item.featured ? 'is-featured' : ''}"><div class="timeline-date ${item.tone}">${escapeHTML(item.date)}</div><div class="timeline-pin ${item.tone}"></div><div class="timeline-copy"><div class="timeline-title"><h3>${escapeHTML(item.label)}</h3>${item.fromChat ? '<span class="chat-source">Desde chat</span>' : ''}</div><p>${escapeHTML(item.detail)}</p></div></article>`).join('');
+  }
+
+  function renderCourseSummary(course) {
+    const dialog = $('#course-dialog');
+    const sessions = SESSIONS.filter((session) => session.courseId === course.id).sort((a, b) => a.day - b.day || a.start - b.start);
+    const unscheduled = UNSCHEDULED.filter((session) => session.courseId === course.id);
+    const dayNames = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    if (dialog) dialog.style.setProperty('--course-color', course.color);
+    $('#course-dialog-code').textContent = course.code;
+    $('#course-dialog-title').textContent = course.name;
+    $('#course-dialog-subtitle').textContent = course.provisional ? 'Información general · ponderación pendiente de confirmar' : 'Información general · datos del sílabo registrado';
+    $('#course-summary-teacher').textContent = course.teacher || 'Por confirmar';
+    $('#course-summary-section').textContent = course.section || 'Por confirmar';
+    $('#course-summary-room').textContent = `Salón ${course.room}`;
+    $('#course-summary-credits').textContent = `${course.credits ?? '—'} créditos`;
+    $('#course-summary-hours').textContent = `${course.hours ?? '—'} h semanales`;
+    $('#course-summary-support').textContent = state.courseSupport?.[course.id] || 'Sin clasificación';
+    $('#course-summary-schedule').innerHTML = `${sessions.map((session) => `<li class="course-schedule-row"><span class="course-schedule-time">${dayNames[session.day]}<strong>${formatTime(session.start)}–${formatTime(session.end)}</strong></span><span class="course-schedule-copy"><strong>${escapeHTML(session.type)}</strong><span>Salón ${escapeHTML(course.room)} · ${session.status === 'pending' ? 'Pendiente · ' : ''}${escapeHTML(session.note)}</span></span></li>`).join('')}${unscheduled.map((session) => `<li class="course-schedule-row is-pending"><span class="course-schedule-time">Pendiente<strong>Por definir</strong></span><span class="course-schedule-copy"><strong>${escapeHTML(session.type)}</strong><span>${escapeHTML(session.note)} · aula por confirmar</span></span></li>`).join('')}` || '<li class="course-schedule-row"><span class="course-schedule-copy"><strong>Sin horario registrado</strong></span></li>';
+    $('#course-summary-status').textContent = course.provisional ? 'Este curso conserva los criterios del sílabo como pendientes hasta que se confirme la ponderación oficial.' : 'Los datos de evaluación se pueden ajustar según el sílabo que utilices.';
+  }
+
+  function updateCourseWeightsTotal() {
+    const inputs = $$('#course-weights-rows input[data-weight-index]');
+    const total = inputs.reduce((sum, input) => sum + (Number(input.value) || 0), 0);
+    const rounded = Math.round(total * 100) / 100;
+    const totalElement = $('#course-weights-total');
+    if (totalElement) {
+      totalElement.textContent = `${rounded.toFixed(rounded % 1 ? 2 : 0)}%`;
+      totalElement.classList.toggle('is-valid', rounded === 100);
+      totalElement.classList.toggle('is-invalid', rounded !== 100);
+    }
+    return rounded;
+  }
+
+  function renderCourseRecovery(course) {
+    const recovery = $('#course-recovery');
+    if (!recovery) return;
+    const result = courseAverage(course);
+    recovery.className = 'course-recovery';
+    if (result.final === null) {
+      recovery.innerHTML = '<div class="course-recovery-heading"><span class="eyebrow">Sustitutoria y aplazados</span><strong>Aún no aplica</strong></div><p>Esta sección aparecerá cuando estén completas las notas oficiales del curso.</p>';
+      return;
+    }
+    if (result.final < MIN_PASS_GRADE) {
+      recovery.classList.add('is-ready');
+      recovery.innerHTML = `<div class="course-recovery-heading"><span class="eyebrow">Recuperación disponible</span><strong>Nota oficial: ${result.final.toFixed(2)} / 20</strong></div><p>La nota oficial está por debajo de ${MIN_PASS_GRADE}. Registra aquí el resultado cuando la universidad publique la fecha o la calificación.</p><div class="course-recovery-options"><div><span>Sustitutoria</span><strong>Pendiente de registrar</strong></div><div><span>Aplazados</span><strong>Pendiente de registrar</strong></div></div>`;
+      return;
+    }
+    recovery.classList.add('is-clear');
+    recovery.innerHTML = `<div class="course-recovery-heading"><span class="eyebrow">Sustitutoria y aplazados</span><strong>No aplica</strong></div><p>La nota oficial es ${result.final.toFixed(2)} / 20 y alcanza la mínima aprobativa de ${MIN_PASS_GRADE}.</p>`;
+  }
+
+  function renderCourseDetail(course) {
+    const weights = courseWeights(course);
+    $('#course-detail-kicker').textContent = `${course.code} · Información completa`;
+    $('#course-detail-source').textContent = `Fuente de referencia: ${course.source}`;
+    $('#course-support-select').value = state.courseSupport?.[course.id] || '';
+    $('#course-weights-rows').innerHTML = weights.map((item, index) => `<div class="course-weight-row"><div><strong>${escapeHTML(item.name)}</strong><span>Porcentaje de la nota final</span></div><label><input data-weight-index="${index}" type="number" min="0" max="100" step="0.1" inputmode="decimal" value="${item.weight}" aria-label="Porcentaje de ${escapeHTML(item.name)}" /><span>%</span></label></div>`).join('');
+    $$('#course-weights-rows input[data-weight-index]').forEach((input) => input.addEventListener('input', updateCourseWeightsTotal));
+    updateCourseWeightsTotal();
+    $('#course-weights-status').textContent = '';
+    $('#course-weights-error').textContent = '';
+    renderCourseRecovery(course);
+  }
+
+  function setCourseDialogView(view) {
+    $('#course-summary-view').hidden = view !== 'summary';
+    $('#course-detail-view').hidden = view !== 'detail';
+  }
+
+  function openCourseDialog(courseId, view = 'summary') {
+    const course = courseById(courseId);
+    const dialog = $('#course-dialog');
+    if (!course || !dialog?.showModal) return;
+    activeCourseId = courseId;
+    renderCourseSummary(course);
+    renderCourseDetail(course);
+    setCourseDialogView(view);
+    dialog.showModal();
+  }
+
+  async function handleCourseWeightsSave(event) {
+    event.preventDefault();
+    const course = courseById(activeCourseId);
+    if (!course) return;
+    const inputs = $$('#course-weights-rows input[data-weight-index]');
+    const values = inputs.map((input) => Math.max(0, Math.min(100, Number(input.value) || 0)));
+    const total = Math.round(values.reduce((sum, value) => sum + value, 0) * 100) / 100;
+    if (total !== 100) {
+      $('#course-weights-error').textContent = `La suma debe ser exactamente 100%. Actualmente tienes ${total}%.`;
+      return;
+    }
+    state.weightOverrides[course.id] = courseWeights(course).map((item, index) => ({ ...item, weight: values[index] }));
+    const support = $('#course-support-select').value;
+    if (support) state.courseSupport[course.id] = support; else delete state.courseSupport[course.id];
+    await saveVault();
+    renderGrades();
+    renderCourseSummary(course);
+    renderCourseDetail(course);
+    $('#course-weights-status').textContent = 'Guardado';
   }
 
   function openDialog(id) { const dialog = $(`#${id}`); if (dialog?.showModal) dialog.showModal(); }
@@ -483,7 +596,14 @@
     $('#main-nav').addEventListener('click', (event) => { const target = event.target.closest('[data-view]'); if (target) showView(target.dataset.view); });
     document.addEventListener('click', (event) => {
       const target = event.target.closest('[data-view-target]'); if (target) showView(target.dataset.viewTarget);
+      const courseTarget = event.target.closest('[data-open-course]'); if (courseTarget) openCourseDialog(courseTarget.dataset.openCourse);
       const dialogTarget = event.target.closest('[data-open-dialog]'); if (dialogTarget) openDialog(dialogTarget.dataset.openDialog);
+    });
+    document.addEventListener('keydown', (event) => {
+      if ((event.key === 'Enter' || event.key === ' ') && event.target.closest('[data-open-course]')) {
+        event.preventDefault();
+        openCourseDialog(event.target.closest('[data-open-course]').dataset.openCourse);
+      }
     });
     $('#quick-add').addEventListener('click', () => openDialog('task-dialog'));
     $('#plan-add').addEventListener('click', () => openDialog('task-dialog'));
@@ -493,6 +613,10 @@
     $('#task-form').addEventListener('submit', handleTaskForm);
     $('#book-form').addEventListener('submit', handleBookForm);
     $('#project-form').addEventListener('submit', handleProjectForm);
+    $('#course-dialog-close').addEventListener('click', () => $('#course-dialog').close());
+    $('#course-detail-button').addEventListener('click', () => { const course = courseById(activeCourseId); if (course) { renderCourseDetail(course); setCourseDialogView('detail'); } });
+    $('#course-summary-back').addEventListener('click', () => setCourseDialogView('summary'));
+    $('#course-weights-form').addEventListener('submit', handleCourseWeightsSave);
     $('#reset-grades').addEventListener('click', async () => { state.grades = {}; await saveVault(); renderGrades(); });
     $('#enable-notifications').addEventListener('click', async (event) => {
       if (!('Notification' in window)) { event.currentTarget.textContent = 'No disponible'; return; }
